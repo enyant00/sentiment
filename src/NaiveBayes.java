@@ -10,6 +10,7 @@ public class NaiveBayes
     double c = 1.0/3.0;
 
     HashMap<String, Integer> positiveFreq;
+    HashMap<String, Double> positiveProb;
 
     public NaiveBayes() throws IOException
     {
@@ -28,7 +29,9 @@ public class NaiveBayes
         String line = "";
         String[] tokens;
         positiveFreq = new HashMap<String, Integer>();
+        positiveProb = new HashMap<String, Double>();
 
+        // Read pos.txt and store each unique word's count in the file
         while ((line = br.readLine()) != null)
         {
             line = line.toLowerCase();
@@ -52,9 +55,16 @@ public class NaiveBayes
             }
         }
 
+
         for (Map.Entry<String, Integer> entry : positiveFreq.entrySet())
         {
-            System.out.println(entry.getKey() + " " + entry.getValue());
+            String key = entry.getKey();
+            double value = entry.getValue();
+            double d = (n + vocabuary); // denominator
+            double prob = (positiveFreq.get(key) + 1) / d;
+
+            positiveProb.put(key, prob);
+            System.out.println(key + " " + prob);
         }
 
         System.out.println("Total words: " + n);
