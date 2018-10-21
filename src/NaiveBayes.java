@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.HashMap;
-import java.util.Map;
 
 public class NaiveBayes
 {
@@ -15,16 +14,16 @@ public class NaiveBayes
 
     public NaiveBayes() throws IOException
     {
-        File posFile = new File("pos.txt");
+        File positiveFile = new File("pos.txt");
         File negativeFile = new File("negative.txt");
         File neutralFile = new File("neutral.txt");
 
-        calcPositive(posFile);
-        calcNegative(negativeFile);
-        calcNeutral(neutralFile);
+        positiveFreq(positiveFile);
+        negativeFreq(negativeFile);
+        neutralFreq(neutralFile);
     }
 
-    private void calcPositive(File file) throws IOException
+    private void positiveFreq(File file) throws IOException
     {
         positiveN = 0;
         positiveV = 0;
@@ -63,7 +62,7 @@ public class NaiveBayes
         fr.close();
     }
 
-    private void calcNegative(File file) throws IOException
+    private void negativeFreq(File file) throws IOException
     {
         negativeN = 0;
         negativeV = 0;
@@ -102,7 +101,7 @@ public class NaiveBayes
         fr.close();
     }
 
-    private void calcNeutral(File file) throws IOException
+    private void neutralFreq(File file) throws IOException
     {
         neutralN = 0;
         neutralV = 0;
@@ -139,5 +138,50 @@ public class NaiveBayes
 
         br.close();
         fr.close();
+    }
+
+    public String classify(String review)
+    {
+        String[] token = review.toLowerCase().split(" ");
+        double positiveProbability = c;
+        double negativeProbability = c;
+        double numerator;
+        double denominator;
+        int threshold = 80;
+
+        for (String word : token)
+        {
+            if (positiveFreq.get(word) == null)
+            {
+                // do not compute
+            }
+            else if (positiveFreq.get(word) < threshold)
+            {
+                numerator = positiveFreq.getOrDefault(word, 0) + 1;
+                denominator = positiveN + positiveV;
+                positiveProbability *= numerator / denominator;
+            }
+
+            if (negativeFreq.get(word) == null)
+            {
+                // do not compute
+            }
+            else if (negativeFreq.get(word) < threshold)
+            {
+                numerator = negativeFreq.getOrDefault(word, 0) + 1;
+                denominator = negativeN + negativeV;
+                negativeProbability *= numerator / denominator;
+            }
+        }
+
+        //System.out.println("Positive: " + positiveProbability);
+        //System.out.println("Negative: " + negativeProbability);
+        System.out.printf("Positive: %.25f \n", positiveProbability);
+        System.out.printf("Negative: %.25f \n", negativeProbability);
+
+        if (positiveProbability < negativeProbability)
+            return "Positive";
+        else
+            return "Negative";
     }
 }
