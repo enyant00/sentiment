@@ -1,3 +1,10 @@
+//=================================================================================================
+// Program		: Sentiment Analysis
+// Class		: NaiveBayes.java
+// Developer	: Zachary Rowton
+// Abstract		:
+//=================================================================================================
+
 import java.io.*;
 import java.util.HashMap;
 
@@ -5,8 +12,10 @@ public class NaiveBayes
 {
     //private int nk; // Number of times particular word appears in document
     private int positiveN, negativeN, neutralN; // Number of total words
-    private int positiveV, negativeV, neutralV; // Number of unique words
-    private double c = 1.0/3.0;
+    private int positiveV, negativeV, neutralV, totalV; // Number of unique words
+    private double linesPositive = 0.0;
+    private double linesNeutral = 0.0;
+    private double linesNegative = 0.0;
 
     private HashMap<String, Integer> positiveFreq;
     private HashMap<String, Integer> negativeFreq;
@@ -21,6 +30,8 @@ public class NaiveBayes
         positiveFreq(positiveFile);
         negativeFreq(negativeFile);
         neutralFreq(neutralFile);
+        //System.out.println("Positive lines: " + linesPositive);
+        //System.out.println("Negative lines: " + linesNegative);
     }
 
     private void positiveFreq(File file) throws IOException
@@ -39,14 +50,16 @@ public class NaiveBayes
         {
             line = line.toLowerCase();
             tokens = line.split(" ");
+            linesPositive++;
 
             for (int i = 0; i < tokens.length; i++)
             {
-                if (positiveFreq.get(tokens[i]) == null)
+                if (positiveFreq.get(tokens[i]) == null) // new positive word
                 {
                     positiveFreq.put(tokens[i], 1);
                     positiveV++;
                     positiveN++;
+                    totalV++;
                 }
                 else
                 {
@@ -78,14 +91,16 @@ public class NaiveBayes
         {
             line = line.toLowerCase();
             tokens = line.split(" ");
+            linesNegative++;
 
             for (int i = 0; i < tokens.length; i++)
             {
-                if (negativeFreq.get(tokens[i]) == null)
+                if (negativeFreq.get(tokens[i]) == null) // new negative word
                 {
                     negativeFreq.put(tokens[i], 1);
                     negativeV++;
                     negativeN++;
+                    totalV++;
                 }
                 else
                 {
@@ -117,14 +132,16 @@ public class NaiveBayes
         {
             line = line.toLowerCase();
             tokens = line.split(" ");
+            linesNeutral++;
 
             for (int i = 0; i < tokens.length; i++)
             {
-                if (neutralFreq.get(tokens[i]) == null)
+                if (neutralFreq.get(tokens[i]) == null) // new neutral word
                 {
                     neutralFreq.put(tokens[i], 1);
                     neutralV++;
                     neutralN++;
+                    totalV++;
                 }
                 else
                 {
@@ -143,11 +160,11 @@ public class NaiveBayes
     public String classify(String review)
     {
         String[] token = review.toLowerCase().split(" ");
-        double positiveProbability = c;
-        double negativeProbability = c;
+        double positiveProbability = linesPositive / (linesNegative + linesPositive);
+        double negativeProbability = linesNegative / (linesPositive + linesNegative);
         double numerator;
         double denominator;
-        int threshold = 80;
+        int threshold = 10;
 
         for (String word : token)
         {
@@ -158,7 +175,7 @@ public class NaiveBayes
             else if (positiveFreq.get(word) < threshold)
             {
                 numerator = positiveFreq.getOrDefault(word, 0) + 1;
-                denominator = positiveN + positiveV;
+                denominator = positiveN;
                 positiveProbability *= numerator / denominator;
             }
 
@@ -169,17 +186,18 @@ public class NaiveBayes
             else if (negativeFreq.get(word) < threshold)
             {
                 numerator = negativeFreq.getOrDefault(word, 0) + 1;
-                denominator = negativeN + negativeV;
+                denominator = negativeN;
                 negativeProbability *= numerator / denominator;
             }
         }
 
         //System.out.println("Positive: " + positiveProbability);
         //System.out.println("Negative: " + negativeProbability);
-        System.out.printf("Positive: %.25f \n", positiveProbability);
-        System.out.printf("Negative: %.25f \n", negativeProbability);
+        System.out.println("Input: " + review);
+        System.out.printf("Positive: %.10f%% \n", positiveProbability * 100.00);
+        System.out.printf("Negative: %.10f%% \n", negativeProbability * 100.00);
 
-        if (positiveProbability < negativeProbability)
+        if (positiveProbability > negativeProbability)
             return "Positive";
         else
             return "Negative";
