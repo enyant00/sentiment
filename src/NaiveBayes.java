@@ -25,6 +25,7 @@ public class NaiveBayes
     private LinkedList<String> positiveDocuments;
     private LinkedList<String> negativeDocuments;
     private LinkedList<String> neutralDocuments;
+    private HashMap<String, Double> weights = new HashMap<String, Double>();
     
     /*
      * NOTES
@@ -44,9 +45,12 @@ public class NaiveBayes
 
         positiveFreq(positiveFile);
         negativeFreq(negativeFile);
-        neutralFreq(neutralFile);        
+        neutralFreq(neutralFile);
+        calcWeights();
         //System.out.println("Positive lines: " + linesPositive);
         //System.out.println("Negative lines: " + linesNegative);
+        
+        System.out.println(weights.get("cake"));
     }
 
     private void positiveFreq(File file) throws IOException
@@ -96,8 +100,6 @@ public class NaiveBayes
                 	freq++;
                 	totalFreq.put(tokens[i], freq);
                 }
-                
-                calcWeight(line, tokens[i]); // TF-IDF weight calculation
             }
         }
 
@@ -152,8 +154,6 @@ public class NaiveBayes
                 	freq++;
                 	totalFreq.put(tokens[i], freq);
                 }
-                
-                calcWeight(line, tokens[i]); // TF-IDF weight calculation
             }
         }
 
@@ -208,8 +208,6 @@ public class NaiveBayes
                 	freq++;
                 	totalFreq.put(tokens[i], freq);
                 }
-                
-                calcWeight(line, tokens[i]); // TF-IDF weight calculation
             }
         }
 
@@ -217,11 +215,83 @@ public class NaiveBayes
         fr.close();
     }
     
+    private void calcWeights()
+    {
+    	for (String document : positiveDocuments)
+    	{
+    		String[] word = document.split(" ");
+    		for (int i = 0; i < word.length; i++)
+    		{
+    			calcWeight(document, word[i]);
+    		}
+    	}
+    	
+    	for (String document : negativeDocuments)
+    	{
+    		String[] word = document.split(" ");
+    		for (int i = 0; i < word.length; i++)
+    		{
+    			calcWeight(document, word[i]);
+    		}
+    	}
+    	
+    	for (String document : neutralDocuments)
+    	{
+    		String[] word = document.split(" ");
+    		for (int i = 0; i < word.length; i++)
+    		{
+    			calcWeight(document, word[i]);
+    		}
+    	}
+    }
+    
     private void calcWeight(String document, String word)
     {
     	double tf;
     	double idf;
     	double tfidf;
+    	double N = (positiveDocuments.size() + negativeDocuments.size() + neutralDocuments.size());
+    	double df = 0.0;
+    	
+    	
+    	tf = countMatches(document, word);
+    	
+    	for (int i = 0; i < positiveDocuments.size(); i++)
+    	{
+    		df += countMatches(positiveDocuments.get(i), word);
+    	}
+    	
+    	for (int i = 0; i < negativeDocuments.size(); i++)
+    	{
+    		df += countMatches(negativeDocuments.get(i), word);
+    	}
+    	
+    	for (int i = 0; i < neutralDocuments.size(); i++)
+    	{
+    		df += countMatches(neutralDocuments.get(i), word);
+    	}
+    	
+    	idf = N / df;
+    	tfidf = tf / idf;
+    	
+    	if (weights.get(word) == null)
+    	{
+    		weights.put(word, tfidf);
+    	}
+    }
+    
+    private int countMatches(String document, String word)
+    {
+    	int index = document.indexOf(word);
+    	int count = 0;
+    	while (index != -1 && index < document.length())
+    	{
+    		count++;
+    		document = document.substring(index + 1);
+    		index = document.indexOf(word);
+    	}
+    	
+    	return count;
     }
 
     public String classify(String review)
