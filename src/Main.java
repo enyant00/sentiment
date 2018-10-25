@@ -5,6 +5,6 @@ public class Main
     public static void main(String[] args) throws IOException, ClassNotFoundException
     {
         NaiveBayes naiveBayes = new NaiveBayes();
-        System.out.println(naiveBayes.classify("a very wonderful cake"));
+        System.out.println(naiveBayes.classify("this is a great cake"));
     }
 }

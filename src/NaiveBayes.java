@@ -49,8 +49,6 @@ public class NaiveBayes
         calcWeights();
         //System.out.println("Positive lines: " + linesPositive);
         //System.out.println("Negative lines: " + linesNegative);
-        
-        System.out.println(weights.get("cake"));
     }
 
     private void positiveFreq(File file) throws IOException
@@ -272,7 +270,7 @@ public class NaiveBayes
     	}
     	
     	idf = N / df;
-    	tfidf = tf / idf;
+    	tfidf = tf * idf;
     	
     	if (weights.get(word) == null)
     	{
@@ -302,15 +300,15 @@ public class NaiveBayes
         double neutralProbability = linesNeutral / (linesPositive + linesNegative + linesNeutral);
         double numerator;
         double denominator;
-        int threshold = 10000;
+        double threshold = 0.1;
 
         for (String word : token)
         {
             if (positiveFreq.get(word) == null)
             {
-                // do not compute
+            	positiveProbability *= 0.1;
             }
-            else if (positiveFreq.get(word) < threshold)
+            else if (weights.get(word) > threshold)
             {
                 numerator = positiveFreq.getOrDefault(word, 0) + 1;
                 denominator = positiveN;
@@ -319,9 +317,9 @@ public class NaiveBayes
 
             if (negativeFreq.get(word) == null)
             {
-                // do not compute
+            	negativeProbability *= 0.1;
             }
-            else if (negativeFreq.get(word) < threshold)
+            else if (weights.get(word) > threshold)
             {
                 numerator = negativeFreq.getOrDefault(word, 0) + 1;
                 denominator = negativeN;
@@ -330,10 +328,10 @@ public class NaiveBayes
             
             if (neutralFreq.get(word) == null)
             {
-            	// do not compute
+            	neutralProbability *= 0.1;
             }
             
-            else if (neutralFreq.get(word) < threshold)
+            else if (weights.get(word) > threshold)
             {
             	numerator = neutralFreq.getOrDefault(word, 0) + 1;
             	denominator = neutralN;
@@ -345,8 +343,8 @@ public class NaiveBayes
         //System.out.println("Negative: " + negativeProbability);
         System.out.println("Input: " + review);
         System.out.printf("Positive: %.10f%% \n", positiveProbability * 100.00);
-        System.out.printf("Negative: %.10f%% \n", negativeProbability * 100.00);
-        System.out.printf("Neutral: %.10f%% \n", neutralProbability * 100.00);
+        System.out.printf("Neutral : %.10f%% \n", neutralProbability * 100.00);
+        System.out.printf("Negative: %.10f%% \n", negativeProbability * 100.00);        
 
         if (positiveProbability > negativeProbability && positiveProbability > neutralProbability)
             return "Positive";
