@@ -1,12 +1,13 @@
 //=================================================================================================
 // Program		: Sentiment Analysis
 // Class		: NaiveBayes.java
-// Developer	: Zachary Rowton
+// Developer	: Zachary Rowton, Brandon Edwards
 // Abstract		:
 //=================================================================================================
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class NaiveBayes
 {
@@ -20,6 +21,20 @@ public class NaiveBayes
     private HashMap<String, Integer> positiveFreq;
     private HashMap<String, Integer> negativeFreq;
     private HashMap<String, Integer> neutralFreq;
+    private HashMap<String, Integer> totalFreq = new HashMap<String, Integer>();
+    private LinkedList<String> positiveDocuments;
+    private LinkedList<String> negativeDocuments;
+    private LinkedList<String> neutralDocuments;
+    
+    /*
+     * NOTES
+     * 
+     * TF-IDF:
+     * TF = Frequency of word in document. (Number of times word appears in the given sentence
+     * IDF = N / df where N is total number of documents (sentences) in collection and 
+     * df is number of documents (sentences) where word appears.
+     * 
+     */
 
     public NaiveBayes() throws IOException
     {
@@ -29,7 +44,7 @@ public class NaiveBayes
 
         positiveFreq(positiveFile);
         negativeFreq(negativeFile);
-        neutralFreq(neutralFile);
+        neutralFreq(neutralFile);        
         //System.out.println("Positive lines: " + linesPositive);
         //System.out.println("Negative lines: " + linesNegative);
     }
@@ -41,6 +56,7 @@ public class NaiveBayes
         String line = "";
         String[] tokens;
         positiveFreq = new HashMap<String, Integer>();
+        positiveDocuments = new LinkedList<String>();
 
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
@@ -49,6 +65,7 @@ public class NaiveBayes
         while ((line = br.readLine()) != null)
         {
             line = line.toLowerCase();
+            positiveDocuments.add(line);
             tokens = line.split(" ");
             linesPositive++;
 
@@ -68,6 +85,19 @@ public class NaiveBayes
                     positiveFreq.put(tokens[i], freq);
                     positiveN++;
                 }
+                
+                if (totalFreq.get(tokens[i]) == null)
+                {
+                	totalFreq.put(tokens[i], 1);
+                }
+                else
+                {
+                	int freq = totalFreq.get(tokens[i]);
+                	freq++;
+                	totalFreq.put(tokens[i], freq);
+                }
+                
+                calcWeight(line, tokens[i]); // TF-IDF weight calculation
             }
         }
 
@@ -82,6 +112,7 @@ public class NaiveBayes
         String line = "";
         String[] tokens;
         negativeFreq = new HashMap<String, Integer>();
+        negativeDocuments = new LinkedList<String>();
 
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
@@ -90,6 +121,7 @@ public class NaiveBayes
         while ((line = br.readLine()) != null)
         {
             line = line.toLowerCase();
+            negativeDocuments.add(line);
             tokens = line.split(" ");
             linesNegative++;
 
@@ -109,6 +141,19 @@ public class NaiveBayes
                     negativeFreq.put(tokens[i], freq);
                     negativeN++;
                 }
+                
+                if (totalFreq.get(tokens[i]) == null)
+                {
+                	totalFreq.put(tokens[i], 1);
+                }
+                else
+                {
+                	int freq = totalFreq.get(tokens[i]);
+                	freq++;
+                	totalFreq.put(tokens[i], freq);
+                }
+                
+                calcWeight(line, tokens[i]); // TF-IDF weight calculation
             }
         }
 
@@ -123,6 +168,7 @@ public class NaiveBayes
         String line = "";
         String[] tokens;
         neutralFreq = new HashMap<String, Integer>();
+        neutralDocuments = new LinkedList<String>();
 
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
@@ -131,6 +177,7 @@ public class NaiveBayes
         while ((line = br.readLine()) != null)
         {
             line = line.toLowerCase();
+            neutralDocuments.add(line);
             tokens = line.split(" ");
             linesNeutral++;
 
@@ -150,21 +197,42 @@ public class NaiveBayes
                     neutralFreq.put(tokens[i], freq);
                     neutralN++;
                 }
+                
+                if (totalFreq.get(tokens[i]) == null)
+                {
+                	totalFreq.put(tokens[i], 1);
+                }
+                else
+                {
+                	int freq = totalFreq.get(tokens[i]);
+                	freq++;
+                	totalFreq.put(tokens[i], freq);
+                }
+                
+                calcWeight(line, tokens[i]); // TF-IDF weight calculation
             }
         }
 
         br.close();
         fr.close();
     }
+    
+    private void calcWeight(String document, String word)
+    {
+    	double tf;
+    	double idf;
+    	double tfidf;
+    }
 
     public String classify(String review)
     {
         String[] token = review.toLowerCase().split(" ");
-        double positiveProbability = linesPositive / (linesNegative + linesPositive);
-        double negativeProbability = linesNegative / (linesPositive + linesNegative);
+        double positiveProbability = linesPositive / (linesPositive + linesNegative + linesNeutral);
+        double negativeProbability = linesNegative / (linesPositive + linesNegative + linesNeutral);
+        double neutralProbability = linesNeutral / (linesPositive + linesNegative + linesNeutral);
         double numerator;
         double denominator;
-        int threshold = 10;
+        int threshold = 10000;
 
         for (String word : token)
         {
@@ -189,6 +257,18 @@ public class NaiveBayes
                 denominator = negativeN;
                 negativeProbability *= numerator / denominator;
             }
+            
+            if (neutralFreq.get(word) == null)
+            {
+            	// do not compute
+            }
+            
+            else if (neutralFreq.get(word) < threshold)
+            {
+            	numerator = neutralFreq.getOrDefault(word, 0) + 1;
+            	denominator = neutralN;
+            	neutralProbability *= numerator / denominator;
+            }
         }
 
         //System.out.println("Positive: " + positiveProbability);
@@ -196,10 +276,15 @@ public class NaiveBayes
         System.out.println("Input: " + review);
         System.out.printf("Positive: %.10f%% \n", positiveProbability * 100.00);
         System.out.printf("Negative: %.10f%% \n", negativeProbability * 100.00);
+        System.out.printf("Neutral: %.10f%% \n", neutralProbability * 100.00);
 
-        if (positiveProbability > negativeProbability)
+        if (positiveProbability > negativeProbability && positiveProbability > neutralProbability)
             return "Positive";
+        else if (negativeProbability > positiveProbability && negativeProbability > neutralProbability)
+        	return "Negative";
+        else if (neutralProbability > positiveProbability && neutralProbability > negativeProbability)
+        	return "Neutral";
         else
-            return "Negative";
+        	return null;
     }
 }
