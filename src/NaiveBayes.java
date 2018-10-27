@@ -39,7 +39,7 @@ public class NaiveBayes
 
     public NaiveBayes() throws IOException
     {
-        File positiveFile = new File("pos.txt");
+        File positiveFile = new File("positiveTraining.txt");
         File negativeFile = new File("negative.txt");
         File neutralFile = new File("neutral.txt");
 
