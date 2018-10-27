@@ -40,8 +40,8 @@ public class NaiveBayes
     public NaiveBayes() throws IOException
     {
         File positiveFile = new File("positiveTraining.txt");
-        File negativeFile = new File("negative.txt");
-        File neutralFile = new File("neutral.txt");
+        File negativeFile = new File("negativeTraining.txt");
+        File neutralFile = new File("neutralTraining.txt");
 
         positiveFreq(positiveFile);
         negativeFreq(negativeFile);
@@ -341,17 +341,18 @@ public class NaiveBayes
 
         //System.out.println("Positive: " + positiveProbability);
         //System.out.println("Negative: " + negativeProbability);
+        System.out.println();
         System.out.println("Input: " + review);
         System.out.printf("Positive: %.10f%% \n", positiveProbability * 100.00);
         System.out.printf("Neutral : %.10f%% \n", neutralProbability * 100.00);
         System.out.printf("Negative: %.10f%% \n", negativeProbability * 100.00);        
 
         if (positiveProbability > negativeProbability && positiveProbability > neutralProbability)
-            return "Positive";
+            return "Classification: Positive";
         else if (negativeProbability > positiveProbability && negativeProbability > neutralProbability)
-        	return "Negative";
+        	return "Classification: Negative";
         else if (neutralProbability > positiveProbability && neutralProbability > negativeProbability)
-        	return "Neutral";
+        	return "Classification: Neutral";
         else
         	return null;
     }

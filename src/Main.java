@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.LinkedList;
 
 public class Main
 {
@@ -6,6 +7,13 @@ public class Main
     {
         DataSeperator dataSeperator = new DataSeperator();
         NaiveBayes naiveBayes = new NaiveBayes();
-        System.out.println(naiveBayes.classify("i really love this cake"));
+
+        LinkedList<String> testingData = new LinkedList<String>();
+        FileManager.readIntoLinkedList("positiveTesting.txt", testingData);
+
+        for (String line : testingData)
+        {
+            System.out.println(naiveBayes.classify(line));
+        }
     }
 }
