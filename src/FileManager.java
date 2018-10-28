@@ -1,5 +1,6 @@
 import java.util.LinkedList;
 import java.io.*;
+import java.util.Random;
 
 public class FileManager
 {
@@ -46,5 +47,26 @@ public class FileManager
 
         //fw.close();
         bw.close();
+    }
+
+    public static void randomizeList(LinkedList<String> list)
+    {
+        LinkedList<String> randomizedList = new LinkedList<>();
+        Random random = new Random();
+        int index;
+
+        while (!list.isEmpty())
+        {
+            index = random.nextInt(list.size());
+
+            randomizedList.add(list.get(index));
+            list.remove(index);
+
+        }
+
+        for (int i = 0; i < randomizedList.size(); i++)
+        {
+            list.add(randomizedList.get(i));
+        }
     }
 }
