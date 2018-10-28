@@ -2,7 +2,9 @@
 // Program		: Sentiment Analysis
 // Class		: NaiveBayes.java
 // Developer	: Zachary Rowton, Brandon Edwards
-// Abstract		:
+// Abstract		: Main java class for all things related to the Naive Bayes
+//                method of classification. Creates frequency and TF-IDF weight
+//                HashMaps.
 //=================================================================================================
 
 import java.io.*;

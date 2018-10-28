@@ -5,7 +5,7 @@ public class Main
 {
     public static void main(String[] args) throws IOException, ClassNotFoundException
     {
-        DataSeperator dataSeperator = new DataSeperator();
+        DataSeparator dataSeparator = new DataSeparator();
         NaiveBayes naiveBayes = new NaiveBayes();
 
         LinkedList<String> testingData = new LinkedList<String>();

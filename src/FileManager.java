@@ -1,3 +1,9 @@
+//=================================================================================================
+// Program		: Sentiment Analysis
+// Class		: FileManager.java
+// Developer	: Zachary Rowton
+// Abstract		: Class for various file reading and writing tasks, and data preparation.
+//=================================================================================================
 import java.util.LinkedList;
 import java.io.*;
 import java.util.Random;

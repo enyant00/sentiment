@@ -1,9 +1,17 @@
+//=================================================================================================
+// Program		: Sentiment Analysis
+// Class		: DataSeparator.java
+// Developer	: Zachary Rowton
+// Abstract		: Reads in the data provided, randomizes the ordering of the sentences,
+//                and splits the data into 80% training and 20% testing,
+//                and writes to file for use in the NaiveBayes class.
+//=================================================================================================
 import java.io.*;
 import java.util.LinkedList;
 
-public class DataSeperator
+public class DataSeparator
 {
-    public DataSeperator() throws IOException
+    public DataSeparator() throws IOException
     {
         LinkedList<String> documents = new LinkedList<String>();
 
